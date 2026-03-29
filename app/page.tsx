@@ -1,20 +1,19 @@
 import CTAButton from '@/components/CTAButton'
 import Link from 'next/link'
+import { home, site, masterclass, expansionOverview, expansionProducts } from '@/lib/content'
 
-const products = [
+const productCards = [
   {
     title: 'Masterclass',
-    description:
-      'Una experiencia de aprendizaje profundo que incluye un planificador de Notion diseñado para acompañarte en tu proceso.',
+    description: masterclass.shortDescription ?? masterclass.description.slice(0, 120) + '…',
     href: '/masterclass',
-    tag: 'Recurso digital',
+    tag: masterclass.tag,
   },
   {
-    title: 'Expansión Alineada',
-    description:
-      'Un programa de coaching personalizado que se adapta a tu ritmo y necesidades. Sesiones individuales y paquetes disponibles.',
+    title: `${expansionOverview.title} ${expansionOverview.titleItalic}`,
+    description: expansionOverview.description,
     href: '/expansion-alineada',
-    tag: 'Programa de coaching',
+    tag: expansionOverview.tag,
   },
 ]
 
@@ -25,45 +24,39 @@ export default function Home() {
       <section className="min-h-screen flex items-center pt-20 pb-16">
         <div className="max-w-5xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
           <div className="space-y-8">
-            <p className="text-sm uppercase tracking-widest text-gold">Coaching · Mentoría</p>
+            <p className="text-sm uppercase tracking-widest text-gold">{site.tagline}</p>
             <h1 className="text-4xl md:text-5xl font-serif leading-tight text-charcoal">
-              Hola, soy <br />
-              <span className="italic">Pri Chaves</span>
+              {home.hero.greeting} <br />
+              <span className="italic">{home.hero.name}</span>
             </h1>
             <p className="text-muted leading-relaxed text-base max-w-md">
-              Acompaño a mujeres en su proceso de expansión personal y profesional, desde un lugar consciente, auténtico y alineado con quienes realmente son.
+              {home.hero.description}
             </p>
             <div className="flex flex-wrap gap-4">
-              <CTAButton href="/expansion-alineada" label="Ver programas" />
-              <CTAButton href="/masterclass" label="Conocer la Masterclass" variant="outline" />
+              <CTAButton href={home.hero.ctaPrimary.href} label={home.hero.ctaPrimary.label} />
+              <CTAButton href={home.hero.ctaSecondary.href} label={home.hero.ctaSecondary.label} variant="outline" />
             </div>
           </div>
 
-          {/* Placeholder image */}
-          <div className="hidden md:block bg-sand aspect-[3/4] w-full max-w-sm mx-auto flex items-center justify-center">
+          <div className="hidden md:flex bg-sand aspect-[3/4] w-full max-w-sm mx-auto items-center justify-center">
             <span className="text-muted text-sm">[ Tu foto aquí ]</span>
           </div>
         </div>
       </section>
 
-      {/* Divider */}
       <div className="border-t border-sand" />
 
       {/* About */}
       <section className="py-24">
         <div className="max-w-3xl mx-auto px-6 text-center space-y-6">
           <p className="text-sm uppercase tracking-widest text-gold">Sobre mí</p>
-          <h2 className="text-3xl font-serif text-charcoal">¿Por qué trabajar conmigo?</h2>
-          <p className="text-muted leading-relaxed">
-            [Espacio para tu historia. Cuéntale a tu audiencia quién eres, cuál es tu misión y qué te hace diferente como coach y mentora.]
-          </p>
-          <p className="text-muted leading-relaxed">
-            [Formación, experiencia, enfoque de trabajo — añade lo que resuene con tu esencia y conecte con tu cliente ideal.]
-          </p>
+          <h2 className="text-3xl font-serif text-charcoal">{home.about.title}</h2>
+          {home.about.paragraphs.map((p, i) => (
+            <p key={i} className="text-muted leading-relaxed">{p}</p>
+          ))}
         </div>
       </section>
 
-      {/* Divider */}
       <div className="border-t border-sand" />
 
       {/* Products */}
@@ -71,11 +64,10 @@ export default function Home() {
         <div className="max-w-5xl mx-auto px-6 space-y-14">
           <div className="text-center space-y-4">
             <p className="text-sm uppercase tracking-widest text-gold">Lo que ofrezco</p>
-            <h2 className="text-3xl font-serif text-charcoal">Formas de trabajar juntas</h2>
+            <h2 className="text-3xl font-serif text-charcoal">{home.productsSection.title}</h2>
           </div>
-
           <div className="grid md:grid-cols-2 gap-8">
-            {products.map((p) => (
+            {productCards.map((p) => (
               <Link
                 key={p.href}
                 href={p.href}
@@ -91,41 +83,35 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Divider */}
       <div className="border-t border-sand" />
 
-      {/* Testimonials placeholder */}
+      {/* Testimonials */}
       <section className="py-24">
         <div className="max-w-5xl mx-auto px-6 space-y-14">
           <div className="text-center space-y-4">
             <p className="text-sm uppercase tracking-widest text-gold">Testimonios</p>
-            <h2 className="text-3xl font-serif text-charcoal">Lo que dicen mis clientas</h2>
+            <h2 className="text-3xl font-serif text-charcoal">{home.testimonials.title}</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
-            {[1, 2, 3].map((i) => (
+            {home.testimonials.items.map((t, i) => (
               <div key={i} className="border border-sand bg-white p-8 space-y-4">
-                <p className="text-muted text-sm leading-relaxed italic">
-                  "[Testimonio de clienta {i}. Resultado transformador, experiencia real.]"
-                </p>
-                <p className="text-xs uppercase tracking-widest text-charcoal">— Nombre, País</p>
+                <p className="text-muted text-sm leading-relaxed italic">"{t.quote}"</p>
+                <p className="text-xs uppercase tracking-widest text-charcoal">— {t.author}, {t.location}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Divider */}
       <div className="border-t border-sand" />
 
-      {/* Contact CTA */}
+      {/* Contact */}
       <section id="contacto" className="py-24">
         <div className="max-w-2xl mx-auto px-6 text-center space-y-8">
           <p className="text-sm uppercase tracking-widest text-gold">¿Lista para comenzar?</p>
-          <h2 className="text-3xl font-serif text-charcoal">Hablemos</h2>
-          <p className="text-muted leading-relaxed">
-            Si sientes que es el momento de dar el siguiente paso, estoy aquí para acompañarte.
-          </p>
-          <CTAButton href="#" label="Reservar una llamada" />
+          <h2 className="text-3xl font-serif text-charcoal">{home.contact.title}</h2>
+          <p className="text-muted leading-relaxed">{home.contact.description}</p>
+          <CTAButton href={site.bookingLink} label={home.contact.ctaLabel} />
         </div>
       </section>
     </>
