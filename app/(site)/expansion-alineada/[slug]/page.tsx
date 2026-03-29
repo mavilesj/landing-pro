@@ -1,23 +1,53 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import CTAButton from '@/components/CTAButton'
-import { expansionProducts, site } from '@/lib/content'
+import { fetchSanity, queries } from '@/lib/sanity'
+import { expansionProducts as productsDefault, site as siteDefault } from '@/lib/content'
+
+export const revalidate = 60
 
 interface Props {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
-// Generates static pages at build time for each product slug
-export function generateStaticParams() {
-  return expansionProducts.map((p) => ({ slug: p.slug }))
+export async function generateStaticParams() {
+  const sanityProducts = await fetchSanity<any[]>(queries.expansionProducts).catch(() => null)
+  const slugs = new Set(productsDefault.map((p) => p.slug))
+  sanityProducts?.forEach((p) => slugs.add(p.slug?.current ?? p.slug))
+  return Array.from(slugs).map((slug) => ({ slug }))
 }
 
-export default function ProductPage({ params }: Props) {
-  const product = expansionProducts.find((p) => p.slug === params.slug)
+export default async function ProductPage({ params: paramsPromise }: Props) {
+  const { slug: slugParam } = await paramsPromise
+  const [sanityProduct, sanitySite] = await Promise.all([
+    fetchSanity<any>(queries.expansionProductBySlug(slugParam)),
+    fetchSanity<any>(queries.siteSettings),
+  ])
 
-  if (!product) notFound()
+  const bookingLink = sanitySite?.bookingLink ?? siteDefault.bookingLink
 
-  const p = product
+  // Prefer Sanity data, fall back to content.ts
+  const fallback = productsDefault.find((p) => p.slug === slugParam)
+  if (!sanityProduct && !fallback) notFound()
+
+  const raw = sanityProduct ?? fallback!
+  const slug = raw.slug?.current ?? raw.slug
+
+  const p = {
+    slug,
+    tag: raw.tag,
+    title: raw.title,
+    titleItalic: raw.titleItalic,
+    description: raw.description,
+    price: raw.price,
+    priceNote: raw.priceNote,
+    ctaLabel: raw.ctaLabel,
+    isFeatured: raw.isFeatured ?? false,
+    specialNote: raw.specialNote ?? null,
+    includes: (raw.includes ?? []) as string[],
+    idealFor: (raw.idealFor ?? []) as string[],
+    sessions: (raw.sessions ?? []) as { num: string; title: string; desc: string }[],
+  }
 
   return (
     <>
@@ -53,7 +83,7 @@ export default function ProductPage({ params }: Props) {
               <p className="text-2xl font-serif text-charcoal">{p.price}</p>
               <p className="text-xs text-muted">{p.priceNote}</p>
             </div>
-            <CTAButton href={site.bookingLink} label={p.ctaLabel} />
+            <CTAButton href={bookingLink} label={p.ctaLabel} />
           </div>
 
           <div className="hidden md:flex bg-sand aspect-square items-center justify-center">
@@ -136,10 +166,10 @@ export default function ProductPage({ params }: Props) {
             Inversión:{' '}
             <span className="text-charcoal font-medium">{p.price}</span>
           </p>
-          <CTAButton href={site.bookingLink} label={p.ctaLabel} />
+          <CTAButton href={bookingLink} label={p.ctaLabel} />
           <p className="text-xs text-muted">
             ¿Tienes dudas?{' '}
-            <Link href={site.contactLink} className="underline underline-offset-4 hover:text-charcoal">
+            <Link href={sanitySite?.contactLink ?? siteDefault.contactLink} className="underline underline-offset-4 hover:text-charcoal">
               Escríbeme
             </Link>
             .

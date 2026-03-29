@@ -1,9 +1,36 @@
 import CTAButton from '@/components/CTAButton'
 import Link from 'next/link'
-import { expansionOverview, expansionProducts, site } from '@/lib/content'
+import { fetchSanity, queries } from '@/lib/sanity'
+import { expansionOverview as eoDefault, expansionProducts as productsDefault, site as siteDefault } from '@/lib/content'
 
-export default function ExpansionAlineadaPage() {
-  const eo = expansionOverview
+export const revalidate = 60
+
+export default async function ExpansionAlineadaPage() {
+  const [sanityEo, sanityProducts, sanitySite] = await Promise.all([
+    fetchSanity<any>(queries.expansionOverview),
+    fetchSanity<any[]>(queries.expansionProducts),
+    fetchSanity<any>(queries.siteSettings),
+  ])
+
+  const bookingLink = sanitySite?.bookingLink ?? siteDefault.bookingLink
+  const products = sanityProducts?.length ? sanityProducts : productsDefault
+
+  const eo = {
+    tag: sanityEo?.tag ?? eoDefault.tag,
+    title: sanityEo?.title ?? eoDefault.title,
+    titleItalic: sanityEo?.titleItalic ?? eoDefault.titleItalic,
+    description: sanityEo?.description ?? eoDefault.description,
+    methodology: {
+      title: sanityEo?.methodology?.title ?? eoDefault.methodology.title,
+      description: sanityEo?.methodology?.description ?? eoDefault.methodology.description,
+    },
+    noDecision: {
+      title: sanityEo?.noDecision?.title ?? eoDefault.noDecision.title,
+      description: sanityEo?.noDecision?.description ?? eoDefault.noDecision.description,
+      ctaLabel: sanityEo?.noDecision?.ctaLabel ?? eoDefault.noDecision.ctaLabel,
+    },
+    testimonials: (sanityEo?.testimonials ?? eoDefault.testimonials) as { quote: string; author: string; location: string }[],
+  }
 
   return (
     <>
@@ -36,10 +63,10 @@ export default function ExpansionAlineadaPage() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
-            {expansionProducts.map((p) => (
+            {products.map((p: any) => (
               <Link
-                key={p.slug}
-                href={`/expansion-alineada/${p.slug}`}
+                key={p.slug?.current ?? p.slug}
+                href={`/expansion-alineada/${p.slug?.current ?? p.slug}`}
                 className="group border border-sand bg-white p-10 flex flex-col gap-5 hover:border-gold transition-colors"
               >
                 <div className="flex items-center justify-between">
@@ -87,7 +114,7 @@ export default function ExpansionAlineadaPage() {
         <div className="max-w-xl mx-auto px-6 text-center space-y-8">
           <h2 className="text-3xl font-serif text-charcoal">{eo.noDecision.title}</h2>
           <p className="text-muted leading-relaxed">{eo.noDecision.description}</p>
-          <CTAButton href={site.bookingLink} label={eo.noDecision.ctaLabel} />
+          <CTAButton href={bookingLink} label={eo.noDecision.ctaLabel} />
         </div>
       </section>
     </>

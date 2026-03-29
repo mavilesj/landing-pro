@@ -1,8 +1,37 @@
 import CTAButton from '@/components/CTAButton'
-import { masterclass, site } from '@/lib/content'
+import { fetchSanity, queries } from '@/lib/sanity'
+import { masterclass as masterclassDefault, site as siteDefault } from '@/lib/content'
 
-export default function MasterclassPage() {
-  const m = masterclass
+export const revalidate = 60
+
+export default async function MasterclassPage() {
+  const [sanityData, sanitySite] = await Promise.all([
+    fetchSanity<any>(queries.masterclassPage),
+    fetchSanity<any>(queries.siteSettings),
+  ])
+
+  const bookingLink = sanitySite?.bookingLink ?? siteDefault.bookingLink
+
+  const m = {
+    tag: sanityData?.tag ?? masterclassDefault.tag,
+    title: sanityData?.title ?? masterclassDefault.title,
+    titleItalic: sanityData?.titleItalic ?? masterclassDefault.titleItalic,
+    description: sanityData?.description ?? masterclassDefault.description,
+    price: sanityData?.price ?? masterclassDefault.price,
+    priceNote: sanityData?.priceNote ?? masterclassDefault.priceNote,
+    ctaLabel: sanityData?.ctaLabel ?? masterclassDefault.ctaLabel,
+    forWhom: {
+      title: sanityData?.forWhom?.title ?? masterclassDefault.forWhom.title,
+      items: (sanityData?.forWhom?.items ?? masterclassDefault.forWhom.items) as string[],
+    },
+    includes: (sanityData?.includes ?? masterclassDefault.includes) as { title: string; desc: string }[],
+    notionPlanner: {
+      title: sanityData?.notionPlanner?.title ?? masterclassDefault.notionPlanner.title,
+      description: sanityData?.notionPlanner?.description ?? masterclassDefault.notionPlanner.description,
+      features: (sanityData?.notionPlanner?.features ?? masterclassDefault.notionPlanner.features) as string[],
+    },
+    faq: (sanityData?.faq ?? masterclassDefault.faq) as { q: string; a: string }[],
+  }
 
   return (
     <>
@@ -20,7 +49,7 @@ export default function MasterclassPage() {
               <p className="text-2xl font-serif text-charcoal">{m.price}</p>
               <p className="text-xs text-muted">{m.priceNote}</p>
             </div>
-            <CTAButton href={site.bookingLink} label={m.ctaLabel} />
+            <CTAButton href={bookingLink} label={m.ctaLabel} />
           </div>
           <div className="hidden md:flex bg-sand aspect-square items-center justify-center">
             <span className="text-muted text-sm">[ Imagen de la Masterclass ]</span>
@@ -106,7 +135,7 @@ export default function MasterclassPage() {
             Acceso inmediato por un único pago de{' '}
             <span className="text-charcoal font-medium">{m.price}</span>
           </p>
-          <CTAButton href={site.bookingLink} label={m.ctaLabel} />
+          <CTAButton href={bookingLink} label={m.ctaLabel} />
         </div>
       </section>
     </>
