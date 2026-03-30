@@ -7,7 +7,7 @@ const singletons = new Set(['siteSettings', 'homePage', 'masterclassPage', 'expa
 
 export default defineConfig({
   basePath: '/studio',
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
+  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'missing-project-id',
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
   title: 'Pri Chaves — Panel de contenido',
   schema: { types: schemaTypes },
