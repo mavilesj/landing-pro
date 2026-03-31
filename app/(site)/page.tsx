@@ -1,6 +1,8 @@
 import CTAButton from '@/components/CTAButton'
 import Link from 'next/link'
+import Image from 'next/image'
 import { fetchSanity, queries } from '@/lib/sanity'
+import { urlFor } from '@/lib/sanityImage'
 import {
   home as homeDefault,
   site as siteDefault,
@@ -93,8 +95,18 @@ export default async function Home() {
               <CTAButton href={home.hero.ctaSecondary.href} label={home.hero.ctaSecondary.label} variant="outline" />
             </div>
           </div>
-          <div className="hidden md:flex bg-sand aspect-[3/4] w-full max-w-sm mx-auto items-center justify-center">
-            <span className="text-muted text-sm">[ Tu foto aquí ]</span>
+          <div className="hidden md:block relative aspect-[3/4] w-full max-w-sm mx-auto bg-sand">
+            {sanityHome?.hero?.image
+              ? <Image
+                  src={urlFor(sanityHome.hero.image)!.width(600).url()}
+                  alt={home.hero.name}
+                  fill
+                  className="object-cover"
+                />
+              : <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-muted text-sm">[ Tu foto aquí ]</span>
+                </div>
+            }
           </div>
         </div>
       </section>
